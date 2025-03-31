@@ -1,11 +1,20 @@
 import { useParams, Navigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { essays } from '../data/essays';
+import { useEssays } from '../contexts/EssayContext';
 
 export default function EssayView() {
     const { id } = useParams();
+    const { essays, loading, error } = useEssays();
     const essay = essays.find(e => e.id === id);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
 
     if (!essay) {
         return <Navigate to="/" replace />;

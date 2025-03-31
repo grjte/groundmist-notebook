@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
-import { essays } from '../data/essays';
+import { useEssays } from '../contexts/EssayContext';
 
 export default function EssayList() {
+    const { essays, loading, error } = useEssays();
+
+    if (loading) {
+        return <div>Loading essays...</div>;
+    }
+
+    if (error) {
+        return <div>Error loading essays: {error.message}</div>;
+    }
+
     return (
         <div className="w-full space-y-8">
             {essays.map((essay) => (
