@@ -1,7 +1,7 @@
 {
-  "name": "groundmist-md-viewer",
+  "name": "groundmist-notebook",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -32,6 +32,5 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
-  },
-  "packageManager": "yarn@3.4.1+sha512.a333bf9c2557d71f5ba87dd1446cde24bb9c35301ec29dd2baba577b3f9d1ab61348b66a1324de9088c40a996c5b9203794da8bf14cab9fae6a6eccc00cb8078"
+  }
 }
