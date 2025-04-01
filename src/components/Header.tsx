@@ -25,13 +25,18 @@ export default function Header() {
                 <div className="flex flex-col">
                     <Link
                         to={`/${handleOrDid}`}
-                        className="text-2xl font-serif font-bold text-gray-900 hover:text-gray-700"
+                        className="text-2xl font-serif font-bold text-blue-500 hover:text-blue-600"
                     >
                         {profile?.displayName || profile?.handle || 'Loading...'}
                     </Link>
-                    <span className="text-sm text-gray-500">
+                    <a
+                        href={`https://bsky.app/profile/${profile?.handle}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-gray-500 hover:text-gray-700 no-underline visited:text-gray-500"
+                    >
                         @{profile?.handle}
-                    </span>
+                    </a>
                 </div>
             </div>
         </header>
