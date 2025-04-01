@@ -21,8 +21,7 @@ interface DidDocument {
  * @returns The PDS URL as a string.
  */
 export async function getPdsUrl(did: string): Promise<string> {
-    // The PLC directory endpoint; adjust if needed for your DID method
-    const url = `${import.meta.env.VITE_ATPROTO_PLC_DIRECTORY_URL}/${did}`;
+    const url = `https://plc.directory/${did}`;
     const response = await fetch(url);
 
     if (!response.ok) {
