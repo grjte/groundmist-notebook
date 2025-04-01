@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { useEssays } from '../contexts/EssayContext';
 
 export default function EssayView() {
-    const { id } = useParams();
+    const { id, handleOrDid } = useParams();
     const { essays, loading, error } = useEssays();
     const essay = essays.find(e => e.id === id);
 
@@ -17,7 +17,7 @@ export default function EssayView() {
     }
 
     if (!essay) {
-        return <Navigate to="/" replace />;
+        return <Navigate to={`/${handleOrDid}`} replace />;
     }
 
     return (

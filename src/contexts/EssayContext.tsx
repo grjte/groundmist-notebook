@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useParams } from 'react-router-dom';
 import { Essay } from '../types';
 import { getPublicEntries } from '../data/entries';
 
@@ -6,20 +7,27 @@ interface EssayContextType {
     essays: Essay[];
     loading: boolean;
     error: Error | null;
+    handleOrDid: string;
 }
 
 const EssayContext = createContext<EssayContextType | undefined>(undefined);
 
 export function EssayProvider({ children }: { children: ReactNode }) {
+    const { handleOrDid } = useParams();
     const [essays, setEssays] = useState<Essay[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         const fetchEssays = async () => {
+            if (!handleOrDid) {
+                setError(new Error('No handle or DID provided'));
+                setLoading(false);
+                return;
+            }
+
             try {
-                // TODO: add pagination
-                const fetchedEssays = await getPublicEntries("rocksfall.bsky.social");
+                const fetchedEssays = await getPublicEntries(handleOrDid);
                 setEssays(fetchedEssays);
             } catch (err) {
                 setError(err instanceof Error ? err : new Error('Failed to fetch essays'));
@@ -27,11 +35,13 @@ export function EssayProvider({ children }: { children: ReactNode }) {
                 setLoading(false);
             }
         };
+
+        setLoading(true);
         fetchEssays();
-    }, []);
+    }, [handleOrDid]);
 
     return (
-        <EssayContext.Provider value={{ essays, loading, error }}>
+        <EssayContext.Provider value={{ essays, loading, error, handleOrDid: handleOrDid || '' }}>
             {children}
         </EssayContext.Provider>
     );

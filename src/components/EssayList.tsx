@@ -2,21 +2,21 @@ import { Link } from 'react-router-dom';
 import { useEssays } from '../contexts/EssayContext';
 
 export default function EssayList() {
-    const { essays, loading, error } = useEssays();
+    const { essays, loading, error, handleOrDid } = useEssays();
 
     if (loading) {
-        return <div>Loading essays...</div>;
+        return <div>Loading...</div>;
     }
 
     if (error) {
-        return <div>Error loading essays: {error.message}</div>;
+        return <div>Error loading content: {error.message}</div>;
     }
 
     return (
         <div className="w-full space-y-8">
             {essays.map((essay) => (
                 <article key={essay.id} className="w-full border-b border-gray-200 pb-8">
-                    <Link to={`/essay/${essay.id}`} className="group block w-full">
+                    <Link to={`/${handleOrDid}/essay/${essay.id}`} className="group block w-full">
                         <h2 className="text-2xl font-serif font-bold text-gray-900 group-hover:text-gray-700 mb-2">
                             {essay.title}
                         </h2>

@@ -7,14 +7,18 @@ import { EssayProvider } from './contexts/EssayContext';
 function App() {
   return (
     <Router>
-      <EssayProvider>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<EssayList />} />
-            <Route path="essay/:id" element={<EssayView />} />
-          </Route>
-        </Routes>
-      </EssayProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/:handleOrDid/*" element={
+            <EssayProvider>
+              <Routes>
+                <Route index element={<EssayList />} />
+                <Route path="essay/:id" element={<EssayView />} />
+              </Routes>
+            </EssayProvider>
+          } />
+        </Route>
+      </Routes>
     </Router>
   );
 }
