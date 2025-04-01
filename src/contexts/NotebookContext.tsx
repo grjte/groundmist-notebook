@@ -1,33 +1,32 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useParams } from 'react-router-dom';
 import { Essay } from '../types';
 import { getPublicEntries } from '../data/entries';
+import { useProfile } from './ProfileContext';
 
-interface EssayContextType {
+interface NotebookContextType {
     essays: Essay[];
     loading: boolean;
     error: Error | null;
-    handleOrDid: string;
 }
 
-const EssayContext = createContext<EssayContextType | undefined>(undefined);
+const NotebookContext = createContext<NotebookContextType | undefined>(undefined);
 
-export function EssayProvider({ children }: { children: ReactNode }) {
-    const { handleOrDid } = useParams();
+export function NotebookProvider({ children }: { children: ReactNode }) {
+    const { loading: profileLoading, profile, pdsUrl } = useProfile();
     const [essays, setEssays] = useState<Essay[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         const fetchEssays = async () => {
-            if (!handleOrDid) {
-                setError(new Error('No handle or DID provided'));
+            if (!profile || !pdsUrl) {
+                setError(new Error('DID and pdsUrl are required to load notebook content'));
                 setLoading(false);
                 return;
             }
 
             try {
-                const fetchedEssays = await getPublicEntries(handleOrDid);
+                const fetchedEssays = await getPublicEntries(profile.did, pdsUrl);
                 setEssays(fetchedEssays);
             } catch (err) {
                 setError(err instanceof Error ? err : new Error('Failed to fetch essays'));
@@ -37,20 +36,26 @@ export function EssayProvider({ children }: { children: ReactNode }) {
         };
 
         setLoading(true);
-        fetchEssays();
-    }, [handleOrDid]);
+        if (!profileLoading) {
+            fetchEssays();
+        }
+    }, [profileLoading]);
 
     return (
-        <EssayContext.Provider value={{ essays, loading, error, handleOrDid: handleOrDid || '' }}>
+        <NotebookContext.Provider value={{
+            essays,
+            loading,
+            error,
+        }}>
             {children}
-        </EssayContext.Provider>
+        </NotebookContext.Provider>
     );
 }
 
-export function useEssays() {
-    const context = useContext(EssayContext);
+export function useNotebook() {
+    const context = useContext(NotebookContext);
     if (context === undefined) {
-        throw new Error('useEssays must be used within an EssayProvider');
+        throw new Error('useNotebook must be used within a NotebookProvider');
     }
     return context;
 } 

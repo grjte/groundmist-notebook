@@ -14,26 +14,6 @@ interface DidDocument {
 }
 
 /**
- * Resolves a handle (e.g. "alice.bsky.social") to a DID by querying the
- * public identity resolution endpoint.
- *
- * @param handle - The handle to resolve.
- * @returns The resolved DID as a string.
- */
-export async function resolveHandleToDid(handle: string): Promise<string> {
-    const url = `${import.meta.env.VITE_ATPROTO_HANDLE_RESOLVER_URL}/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`Failed to resolve handle ${handle}: ${response.statusText}`);
-    }
-
-    const data: { did: string } = await response.json();
-    return data.did;
-}
-
-
-/**
  * Given a DID, fetch its DID document from the PLC directory
  * and extract the PDS service endpoint URL.
  *
@@ -66,19 +46,24 @@ export async function getPdsUrl(did: string): Promise<string> {
     return pdsService.serviceEndpoint;
 }
 
-export const getPublicEntries = async (handleOrDid: string): Promise<Essay[]> => {
+// TODO: update return type
+export const getProfile = async (did: string): Promise<any> => {
     try {
-        console.log("handleOrDid", handleOrDid);
-        let did: string;
-        if (handleOrDid.startsWith("did:")) {
-            did = handleOrDid;
-        } else {
-            did = await resolveHandleToDid(handleOrDid);
-        }
-        console.log("did", did);
-        const pdsUrl = await getPdsUrl(did);
-        console.log("pdsUrl", pdsUrl);
+        const agent = new AtpAgent({
+            service: "https://public.api.bsky.app",
+        })
+        const profile = await agent.app.bsky.actor.getProfile({
+            actor: did
+        })
+        return profile.data;
+    } catch (e) {
+        console.error('Error getting profile from ATProto:', e)
+        throw e
+    }
+}
 
+export const getPublicEntries = async (did: string, pdsUrl: string): Promise<Essay[]> => {
+    try {
         const agent = new AtpAgent({
             service: pdsUrl
         })
@@ -87,18 +72,20 @@ export const getPublicEntries = async (handleOrDid: string): Promise<Essay[]> =>
             collection: "xyz.groundmist.notebook.essay",
             limit: 20
         })
-        console.log("records", records);
-        // TODO: update type; add preview to record
         const entries = records.data.records.map((record: any) => {
+            // Extract markdown title if it exists
+            const titleMatch = record.value.text.match(/^#\s+(.*?)(\r?\n|\r|$)/);
+            const markdownTitle = titleMatch ? titleMatch[1].trim() : null;
+            // Strip the title from content if it exists
+            const content = record.value.text.replace(/^#\s+.*(\r?\n|\r|$)/, '').trim();
             return {
-                content: record.value.text,
-                title: record.value.title,
+                content,
+                title: markdownTitle || record.value.title,
                 date: (record.value.createdAt),
                 id: record.cid,
-                preview: record.value.text.slice(0, 150)
+                preview: content.slice(0, 150)
             } as Essay
         });
-        console.log("entries", entries);
         return entries;
     } catch (e) {
         console.error('Error getting entries from ATProto:', e)

@@ -1,12 +1,13 @@
 import { useParams, Navigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useEssays } from '../contexts/EssayContext';
+import { useNotebook } from '../contexts/NotebookContext';
+import { Essay } from '../types';
 
 export default function EssayView() {
     const { id, handleOrDid } = useParams();
-    const { essays, loading, error } = useEssays();
-    const essay = essays.find(e => e.id === id);
+    const { essays, loading, error } = useNotebook();
+    const essay = essays.find((e: Essay) => e.id === id);
 
     if (loading) {
         return <div>Loading...</div>;
